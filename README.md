@@ -5,25 +5,13 @@ This project provides a Scala REPL with a GUI inspired by Mathematica worksheets
 
 The frontend is just an HTML page that communicates with a backend servlet via web sockets. The backend servlet does the actual command execution. The servlet is not multi-user save; the program is meant to be run on a single computer.
 
-**CAVEAT**: Right now, this is all highly experimental. And it has been thorougly tested only in Safari.
+**CAVEAT**: Right now, this is all highly experimental. And it has been thoroughly tested only in Safari.
 
 How to Run it
 -------------
 
-After downloading, use SBT to build
-
-      sbt update
-      sbt compile
-
-and then run the REPL servlet within an embedded Jetty server:
-
-      sbt run
-
-Then open the html file that contains the frontend in your browser:
-
-      src/main/webapp/index.html
-
-
+ - Configure `src/main/resources/application.conf`
+ - `sbt run`
 
 Accessing Application Classes
 -----------------------------

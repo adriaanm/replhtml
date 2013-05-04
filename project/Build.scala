@@ -7,13 +7,11 @@ object ReplHtmlBuild extends Build {
     name         := "replhtml",
     version      := "1.1",
     scalaVersion := "2.10.1",
-    libraryDependencies := Seq(
-      "org.scala-lang" % "scala-compiler" % "2.10.1",
-      "org.scala-lang" % "scala-reflect" % "2.10.1",
-      "org.scala-lang" % "scala-library" % "2.10.1",
-      "net.databinder" %% "unfiltered-filter" % "0.6.8",
-      "net.databinder" %% "unfiltered-netty-server" % "0.6.8",
-      "net.databinder" %% "unfiltered-netty-websockets" % "0.6.8")
+    libraryDependencies <<= (scalaVersion)(sv =>
+      Seq("compiler").map(x => "org.scala-lang" % ("scala-" + x) % sv)
+    ),
+    libraryDependencies += "play" %% "play" % "2.1.1",
+    resolvers += "Typesafe Repository" at "http://repo.typesafe.com/typesafe/releases/"
   )
 
   val setupReplClassPath = TaskKey[Unit]("setup-repl-classpath", "Set up the repl server's classpath based on our dependencies.")

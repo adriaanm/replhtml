@@ -1,21 +1,14 @@
-package ch.epfl.lamp.replhtml
-
-import unfiltered.netty.websockets._
 import scala.util.matching.Regex
+import java.io.File
+import play.api.libs.json.Json
+import play.api.mvc.{WebSocket, Handler, RequestHeader, Action}
+import play.api.mvc.Results._
+import play.api.GlobalSettings
+import play.core.StaticApplication
+import play.api.libs.iteratee.{Concurrent, Enumerator, Iteratee}
+import scala.util.Try
 
 object ReplMain {
-  def main(args: Array[String]) {
-    val sockets = collection.mutable.ListBuffer.empty[WebSocket]
-    // TODO: WebSocketServer is deprecated in unfiltered 0.6.8
-    WebSocketServer("/socket/repl", 8080) {
-      case Open(s)               => sockets += s
-      case Message(s, Text(str)) => println(s"message: $str")
-        val resp = interpret(str); println(s"Response: $resp")
-        sockets foreach (_.send(resp))
-      case Close(s)    => sockets -= s
-      case Error(s, e) => println(s"error ${e.getMessage}")
-    } run ()
-  }
 
   import scala.tools.nsc._
   import scala.tools.nsc.interpreter._
@@ -35,8 +28,8 @@ object ReplMain {
       def rx = new Regex(sc.parts.mkString(""), sc.parts.tail.map(_ => "x"): _*)
     }
     object I { def unapply(x: String): Option[Int] = scala.util.Try { x.toInt } toOption }
-    data.split(":", 2) match {
-      case Array(rx"""complete@(\d*)${I(pos)}""", source) =>
+    data.split(":", 2).toSeq match {
+      case Seq(rx"""complete@(\d*)${I(pos)}[\]]?""", source) =>
         "<completion>:" + pos + "\n" + {
           lazy val tokens = source.substring(0, pos).split("""[\ \,\;\(\)\{\}]""") // could tokenize on client
           if (pos <= source.length && tokens.nonEmpty)
@@ -44,7 +37,7 @@ object ReplMain {
           else ""
         }
 
-      case Array("run", source) =>
+      case Seq("run", source) =>
         util.stringFromStream { ostream =>
           Console.withOut(ostream) {
             interpreter.interpret(source) match {
