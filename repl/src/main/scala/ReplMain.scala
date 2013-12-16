@@ -14,8 +14,9 @@ class ReplMain {
 
   def init(): Unit = {
     settings.classpath.value = System.getProperty("replhtml.class.path")
-    settings.lint.value = true
+    // settings.lint.value = true
     settings.feature.value = true
+    settings.deprecation.value = true
     interpreter
   }
 
