@@ -1,22 +1,28 @@
+package replhtml
+
 import scala.util.matching.Regex
 import scala.util.Try
 
-object ReplMain {
+class ReplMain {
 
   import scala.tools.nsc._
   import scala.tools.nsc.interpreter._
 
-  val cmd = new CommandLine(Nil, println)
+  lazy val cmd = new CommandLine(Nil, println)
 
   import cmd.settings
 
-  settings.classpath.value = System.getProperty("replhtml.class.path")
-  settings.lint.value = true
-  settings.feature.value = true
+  def init(): Unit = {
+    settings.classpath.value = System.getProperty("replhtml.class.path")
+    settings.lint.value = true
+    settings.feature.value = true
+    interpreter
+  }
 
-  val interpreter = new IMain(settings)
-  val completion  = new JLineCompletion(interpreter)
-
+  // must call init() first!
+  lazy val interpreter = new IMain(settings)
+  lazy val completion  = new JLineCompletion(interpreter)
+ 
   def interpret(data: String): String = {
     // TODO: use json
     implicit class RContext(sc: StringContext) {

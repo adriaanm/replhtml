@@ -26,13 +26,13 @@ object ReplHtmlBuild extends Build {
     "replhtml",
     file ("."),
     settings = mySettings ++ Seq(
-      libraryDependencies += "ch.epfl.lamp" % s"repl_${(scalaBinaryVersion in repl).value}" % s"${(version in repl).value}",
+      libraryDependencies += "ch.epfl.lamp" % s"repl_${(scalaBinaryVersion in repl).value}" % s"${(version in repl).value}" % "runtime",
       setupReplClassPath := {
-        val cpStr = (dependencyClasspath in Compile in repl).value map { case Attributed(str) => str} mkString(System.getProperty("path.separator"))
+        val cpStr = (fullClasspath in Compile in repl).value map { case Attributed(str) => str} mkString(System.getProperty("path.separator"))
         println("Repl will use classpath "+ cpStr)
         System.setProperty("replhtml.class.path", cpStr)
       },
-      run in Compile <<= (run in Compile).dependsOn(setupReplClassPath)
+      run in Compile <<= (run in Compile).dependsOn(setupReplClassPath).dependsOn(publishLocal in Compile in repl)
     )
   )
 }

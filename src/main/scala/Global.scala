@@ -18,8 +18,21 @@ object Global extends GlobalSettings {
   private val port        = config.getInt("http.port").getOrElse(8081)
   private val keyDown     = new Keydown(new File(keydownRoot.get))
 
+  type ReplMain = {def init(): Unit; def interpret(s: String): String}
+  private lazy val ReplMain: ReplMain = {
+    import java.net.{URLClassLoader, URL}
+    val classPath = System.getProperty("replhtml.class.path").split(java.io.File.pathSeparator).map{
+      case f if f endsWith "classes" => new URL("file://"+f+"/")
+      case f => new URL("file://"+f)
+    }
+    // find root loader -- the one that doesn't have scala.Unit (since we're running in a different scala version)
+    var root = ClassLoader.getSystemClassLoader().getParent()
+    val loader = new URLClassLoader(classPath, root)
+    loader.loadClass("replhtml.ReplMain").newInstance().asInstanceOf[ReplMain]
+  }
+
   def main(args: Array[String]) {
-    ReplMain
+    ReplMain.init()
     val server = new play.core.server.NettyServer(appProvider, port)
     println("Press any key to stop.")
     readLine()
